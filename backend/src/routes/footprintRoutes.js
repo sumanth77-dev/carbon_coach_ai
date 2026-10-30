@@ -10,14 +10,14 @@ import { authenticate, optionalAuthenticate } from '../middleware/authMiddleware
 
 const router = Router();
 
-// Calculator endpoints (support optional authentication for both guests & logged in users)
+// Calculator and Dashboard endpoints (support optional authentication for both guests & logged in users)
 router.post('/calculate', optionalAuthenticate, calculateFootprint);
 router.post('/save-batch', optionalAuthenticate, saveBatchFootprints);
+router.get('/summary', optionalAuthenticate, getFootprintSummary);
 
 // Protected telemetry endpoints
 router.use(authenticate);
 router.post('/activity', logEmissionActivity);
 router.get('/history', getFootprintHistory);
-router.get('/summary', getFootprintSummary);
 
 export default router;

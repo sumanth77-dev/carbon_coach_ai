@@ -1,14 +1,22 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calculator, Activity, Sparkles, MessageSquare, Settings, X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Calculator,
+  Activity,
+  BarChart3,
+  Sparkles,
+  MessageSquare,
+  Settings,
+  X,
+} from 'lucide-react';
 
 const navigationItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { name: 'AI Assistant', path: '/chat', icon: MessageSquare },
   { name: 'Carbon Calculator', path: '/calculator', icon: Calculator },
-  { name: 'Activities', path: '/activities', icon: Activity },
-  { name: 'Recommendations', path: '/recommendations', icon: Sparkles },
-  { name: 'AI Coach Chat', path: '/chat', icon: MessageSquare },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  { name: 'Activity History', path: '/activities', icon: Activity },
+  { name: 'Carbon Analytics', path: '/analytics', icon: BarChart3 },
 ];
 
 /**

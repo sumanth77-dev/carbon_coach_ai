@@ -72,10 +72,10 @@ export const RecommendationPreview = ({ recommendation }) => {
           {source || 'Gemini AI Agent'}
         </span>
         <Link
-          to="/recommendations"
+          to="/chat"
           className="inline-flex items-center text-xs font-semibold text-primary hover:text-primary-dark transition-colors gap-1"
         >
-          <span>Explore recommendations</span>
+          <span>Ask AI Coach</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

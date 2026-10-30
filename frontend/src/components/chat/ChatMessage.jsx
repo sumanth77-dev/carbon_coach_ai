@@ -88,6 +88,19 @@ export const ChatMessage = ({ message, onRetry }) => {
             </div>
           )}
 
+          {/* Distinct Actionable Reduction Tip Highlight */}
+          {message.reductionTip && (
+            <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/20 text-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-primary uppercase text-[10px] tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Personalized Reduction Tip</span>
+              </div>
+              <p className="text-text-main font-medium leading-relaxed">
+                {message.reductionTip}
+              </p>
+            </div>
+          )}
+
           {/* Missing Information Follow-up Highlight */}
           {message.type === 'missing_info' && message.followUpQuestion && (
             <div className="mt-3 p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-md text-xs text-amber-900 flex items-start gap-2">

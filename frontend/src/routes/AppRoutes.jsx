@@ -6,6 +6,7 @@ import { CalculatorPage } from '../pages/CalculatorPage';
 import { ActivitiesPage } from '../pages/ActivitiesPage';
 import { RecommendationsPage } from '../pages/RecommendationsPage';
 import { ChatPage } from '../pages/ChatPage';
+import { AnalyticsPage } from '../pages/AnalyticsPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
 /**
@@ -16,11 +17,10 @@ export const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<DashboardPage />} />
+        <Route path="chat" element={<ChatPage />} />
         <Route path="calculator" element={<CalculatorPage />} />
         <Route path="activities" element={<ActivitiesPage />} />
-        <Route path="recommendations" element={<RecommendationsPage />} />
-        <Route path="chat" element={<ChatPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
       </Route>
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/" replace />} />

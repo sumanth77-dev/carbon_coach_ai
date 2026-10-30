@@ -6,7 +6,25 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
  * Conforms strictly to the brand palette (#245C45, #3B7A5E, #5B9377, #8BAF99).
  */
 export const CategoryBreakdownDonut = ({ data = [] }) => {
-  const totalEmission = data.reduce((acc, item) => acc + (item.emission || 0), 0);
+  // Defensively consolidate categories so each category appears strictly once
+  const consolidatedData = React.useMemo(() => {
+    const map = {};
+    for (const item of data) {
+      const cat = item.category;
+      if (!map[cat]) {
+        map[cat] = { ...item };
+      } else {
+        map[cat].emission = parseFloat((map[cat].emission + item.emission).toFixed(2));
+      }
+    }
+    const total = Object.values(map).reduce((sum, it) => sum + (it.emission || 0), 0);
+    return Object.values(map).map((it) => ({
+      ...it,
+      percentage: total > 0 ? Math.round((it.emission / total) * 100) : 0,
+    }));
+  }, [data]);
+
+  const totalEmission = consolidatedData.reduce((acc, item) => acc + (item.emission || 0), 0);
 
   // Custom clean tooltip matching the design system
   const CustomTooltip = ({ active, payload }) => {
@@ -33,7 +51,7 @@ export const CategoryBreakdownDonut = ({ data = [] }) => {
     return null;
   };
 
-  if (!data || data.length === 0) {
+  if (!consolidatedData || consolidatedData.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-xs text-text-secondary">
         No category emission data logged yet.
@@ -49,7 +67,7 @@ export const CategoryBreakdownDonut = ({ data = [] }) => {
           <PieChart>
             <Tooltip content={<CustomTooltip />} />
             <Pie
-              data={data}
+              data={consolidatedData}
               cx="50%"
               cy="50%"
               innerRadius={55}
@@ -60,7 +78,7 @@ export const CategoryBreakdownDonut = ({ data = [] }) => {
               stroke="#FFFFFF"
               strokeWidth={2}
             >
-              {data.map((entry, index) => (
+              {consolidatedData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
@@ -79,7 +97,7 @@ export const CategoryBreakdownDonut = ({ data = [] }) => {
 
       {/* Structured Category Legend with Percentages */}
       <div className="w-full flex-1 space-y-2.5">
-        {data.map((item) => (
+        {consolidatedData.map((item) => (
           <div
             key={item.category}
             className="flex items-center justify-between p-2 rounded bg-background/60 border border-border/50 text-xs hover:bg-background transition-colors"

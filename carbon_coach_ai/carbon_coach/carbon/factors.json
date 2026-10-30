@@ -1,0 +1,32 @@
+{
+ "_note": "Rounded working figures. Entries with verify=true must be checked against the cited current edition before publishing.",
+ "grid_india": {"value": 0.71, "unit": "kg/kWh", "source": "CEA CO2 Baseline Database (approx. recent edition)", "confidence": "high", "verify": true},
+ "fuel": {"petrol": {"value": 2.31, "unit": "kg/L", "source": "IPCC 2006 / DEFRA (approx.)", "confidence": "high", "verify": true},
+          "diesel": {"value": 2.68, "unit": "kg/L", "source": "IPCC 2006 / DEFRA (approx.)", "confidence": "high", "verify": true}},
+ "default_mileage_kmpl": {"petrol_bike": 45, "petrol_car": 15, "diesel_car": 18},
+ "ev_kwh_per_km": {"ev_bike": 0.03, "ev_car": 0.12},
+ "public_kg_per_pkm": {
+  "bus": {"value": 0.03, "source": "India city bus estimate (ICCT/DEFRA-based)", "confidence": "medium", "verify": true},
+  "train": {"value": 0.008, "source": "Indian Railways passenger estimate", "confidence": "medium", "verify": true},
+  "flight": {"value": 0.16, "source": "DEFRA economy short/medium-haul (approx.)", "confidence": "medium", "verify": true},
+  "walk": {"value": 0, "source": "Zero direct emissions", "confidence": "high"},
+  "cycle": {"value": 0, "source": "Zero direct emissions", "confidence": "high"}},
+ "appliance_watts": {"ac": 1200, "fan": 60, "refrigerator": 50, "light": 9, "washing_machine": 500, "geyser": 2000, "tv": 100, "laptop": 50},
+ "ac_kw_per_ton": 0.8,
+ "food_kg_per_meal": {
+  "vegetarian": {"value": 0.5, "source": "Poore & Nemecek 2018 (approx. serving)", "confidence": "medium", "verify": true},
+  "chicken": {"value": 1.2, "source": "Poore & Nemecek 2018 (~150 g)", "confidence": "medium", "verify": true},
+  "mutton": {"value": 3.6, "source": "Poore & Nemecek 2018 (~150 g)", "confidence": "medium", "verify": true},
+  "beef": {"value": 6.0, "source": "Poore & Nemecek 2018 (~100 g)", "confidence": "medium", "verify": true},
+  "fish": {"value": 1.0, "source": "Poore & Nemecek 2018 (approx.)", "confidence": "low", "verify": true},
+  "dairy": {"value": 0.6, "source": "Poore & Nemecek 2018 (approx.)", "confidence": "low", "verify": true}},
+ "food_waste_kg_per_kg": {"value": 0.7, "source": "DEFRA food waste to landfill (approx.)", "confidence": "medium", "verify": true},
+ "shopping_kg_per_item": {
+  "clothing": {"value": 7, "source": "Lifecycle estimates, cotton shirt", "confidence": "low", "verify": true},
+  "electronics_phone": {"value": 70, "source": "Manufacturer footprint reports (approx.)", "confidence": "medium", "verify": true},
+  "plastic_product": {"value": 1.5, "source": "Generic estimate", "confidence": "low", "verify": true}},
+ "waste_kg_per_kg": {
+  "plastic": {"value": 0.02, "source": "DEFRA landfill (approx.)", "confidence": "low", "verify": true},
+  "paper": {"value": 1.2, "source": "DEFRA landfill (approx.)", "confidence": "low", "verify": true},
+  "organic": {"value": 0.7, "source": "DEFRA landfill (approx.)", "confidence": "medium", "verify": true}}
+}

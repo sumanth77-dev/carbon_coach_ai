@@ -21,6 +21,7 @@ import { CategoryBreakdownDonut } from '../components/charts/CategoryBreakdownDo
 import { WeeklyTrendChart } from '../components/charts/WeeklyTrendChart';
 import { RecentActivityTable } from '../components/dashboard/RecentActivityTable';
 import { RecommendationPreview } from '../components/dashboard/RecommendationPreview';
+import { PersonalizedSuggestions } from '../components/dashboard/PersonalizedSuggestions';
 
 /**
  * Carbon Coach Dashboard Page
@@ -104,6 +105,7 @@ export const DashboardPage = () => {
     categoryBreakdown = [],
     weeklyTrends = [],
     recentActivities = [],
+    recommendations = [],
     recommendationPreview,
     isDemo,
   } = data || {};
@@ -177,8 +179,8 @@ export const DashboardPage = () => {
           value={summary?.totalFootprint?.value || '0'}
           unit={summary?.totalFootprint?.unit || 'kg CO₂e'}
           change={summary?.totalFootprint?.change}
-          changeType={summary?.totalFootprint?.changeType || 'decrease'}
-          changeLabel={summary?.totalFootprint?.changeLabel || 'vs last month'}
+          changeType={summary?.totalFootprint?.changeType || 'neutral'}
+          changeLabel={summary?.totalFootprint?.changeLabel || 'recorded to date'}
           icon={Leaf}
         />
         <StatCard
@@ -186,8 +188,8 @@ export const DashboardPage = () => {
           value={summary?.todayEmissions?.value || '0'}
           unit={summary?.todayEmissions?.unit || 'kg CO₂e'}
           change={summary?.todayEmissions?.change}
-          changeType={summary?.todayEmissions?.changeType || 'decrease'}
-          changeLabel={summary?.todayEmissions?.changeLabel || 'vs yesterday'}
+          changeType={summary?.todayEmissions?.changeType || 'neutral'}
+          changeLabel={summary?.todayEmissions?.changeLabel || 'today'}
           icon={Clock}
         />
         <StatCard
@@ -195,8 +197,8 @@ export const DashboardPage = () => {
           value={summary?.thisWeekEmissions?.value || '0'}
           unit={summary?.thisWeekEmissions?.unit || 'kg CO₂e'}
           change={summary?.thisWeekEmissions?.change}
-          changeType={summary?.thisWeekEmissions?.changeType || 'decrease'}
-          changeLabel={summary?.thisWeekEmissions?.changeLabel || 'vs last week'}
+          changeType={summary?.thisWeekEmissions?.changeType || 'neutral'}
+          changeLabel={summary?.thisWeekEmissions?.changeLabel || 'past 7 days'}
           icon={TrendingDown}
         />
         <StatCard
@@ -243,41 +245,27 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* 5 & 6. Recent Activities Table & AI Recommendation Preview Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* 5. Recent Activities */}
-        <div className="lg:col-span-8">
-          <Card
-            title="Recent Activities"
-            subtitle="Latest carbon emission telemetry entries"
-            action={
-              <Link
-                to="/activities"
-                className="text-xs font-semibold text-primary hover:text-primary-dark transition-colors"
-              >
-                Log New
-              </Link>
-            }
-          >
-            <RecentActivityTable activities={recentActivities} />
-          </Card>
-        </div>
+      {/* 5. Ways to Reduce Your Carbon Footprint (Section 1.A: 3 Personalized Suggestions) */}
+      <PersonalizedSuggestions
+        suggestions={recommendations.length > 0 ? recommendations : (recommendationPreview ? [recommendationPreview] : [])}
+        isLoading={loading}
+      />
 
-        {/* 6. AI Recommendation Preview */}
-        <div className="lg:col-span-4">
-          <Card
-            title="AI Recommendation"
-            subtitle="Analyzed by Gemini sustainability coach"
-            action={
-              <div className="w-5 h-5 text-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
-              </div>
-            }
+      {/* 6. Recent Activities Table */}
+      <Card
+        title="Recent Activities"
+        subtitle="Latest carbon emission telemetry entries from your activity history"
+        action={
+          <Link
+            to="/activities"
+            className="text-xs font-semibold text-primary hover:text-primary-dark transition-colors"
           >
-            <RecommendationPreview recommendation={recommendationPreview} />
-          </Card>
-        </div>
-      </div>
+            View All Activities →
+          </Link>
+        }
+      >
+        <RecentActivityTable activities={recentActivities} />
+      </Card>
     </div>
   );
 };

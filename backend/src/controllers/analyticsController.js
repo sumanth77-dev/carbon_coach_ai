@@ -1,143 +1,133 @@
+import { adkService } from '../services/adkService.js';
+
 /**
  * Analytics Controller
- * Provides aggregated analytics telemetry, category breakdowns, time-series trends, and AI insights.
+ * Provides aggregated analytics telemetry, category breakdowns, time-series trends,
+ * and AI insights derived from real Python SQLite activity storage.
  */
 
-const PERIOD_METRICS = {
-  today: {
-    totalEmissions: 14.2,
-    averageDaily: 14.2,
-    totalActivities: 3,
-    largestCategory: 'Electricity (45%)',
-    periodChange: '-2.1 kg vs yesterday',
-    periodChangeType: 'decrease',
-    highestCategory: 'Electricity',
-    lowestCategory: 'Waste',
-    mostActiveDay: 'Today (3 entries)',
-    categories: [
-      { category: 'Transportation', emission: 4.8, percentage: 34, color: '#245C45' },
-      { category: 'Electricity', emission: 6.4, percentage: 45, color: '#3B7A5E' },
-      { category: 'Food', emission: 2.4, percentage: 17, color: '#5B9377' },
-      { category: 'Waste', emission: 0.6, percentage: 4, color: '#8BAF99' },
-    ],
-    trends: [
-      { label: '8 AM', emission: 6.4, target: 8.0 },
-      { label: '1 PM', emission: 3.0, target: 8.0 },
-      { label: '6 PM', emission: 4.8, target: 8.0 },
-    ],
-    aiInsights: [
-      'Your electricity consumption was your primary driver today, accounting for 45% of emissions.',
-      'Commute emissions were kept low thanks to using electrified public transit.',
-    ],
-  },
-  '7days': {
-    totalEmissions: 98.6,
-    averageDaily: 14.09,
-    totalActivities: 24,
-    largestCategory: 'Transportation (42%)',
-    periodChange: '-11.5% vs previous 7 days',
-    periodChangeType: 'decrease',
-    highestCategory: 'Transportation',
-    lowestCategory: 'Waste',
-    mostActiveDay: 'Tuesday, Oct 25 (18.2 kg)',
-    categories: [
-      { category: 'Transportation', emission: 41.5, percentage: 42, color: '#245C45' },
-      { category: 'Electricity', emission: 27.8, percentage: 28, color: '#3B7A5E' },
-      { category: 'Food', emission: 18.2, percentage: 19, color: '#5B9377' },
-      { category: 'Waste', emission: 11.1, percentage: 11, color: '#8BAF99' },
-    ],
-    trends: [
-      { label: 'Mon', date: 'Oct 24', emission: 15.4, target: 16.0 },
-      { label: 'Tue', date: 'Oct 25', emission: 18.2, target: 16.0 },
-      { label: 'Wed', date: 'Oct 26', emission: 12.8, target: 16.0 },
-      { label: 'Thu', date: 'Oct 27', emission: 16.5, target: 16.0 },
-      { label: 'Fri', date: 'Oct 28', emission: 14.2, target: 16.0 },
-      { label: 'Sat', date: 'Oct 29', emission: 11.0, target: 16.0 },
-      { label: 'Sun', date: 'Oct 30', emission: 10.5, target: 16.0 },
-    ],
-    aiInsights: [
-      'Your largest emission source is Transportation, representing 42% of your weekly footprint.',
-      'Your weekly footprint decreased by 11.5% compared to the prior period, remaining 21% below your target ceiling.',
-      'Weekend emissions were 32% lower than weekday commuting averages.',
-    ],
-  },
-  '30days': {
-    totalEmissions: 432.8,
-    averageDaily: 14.43,
-    totalActivities: 86,
-    largestCategory: 'Transportation (44%)',
-    periodChange: '-8.4% vs previous 30 days',
-    periodChangeType: 'decrease',
-    highestCategory: 'Transportation',
-    lowestCategory: 'Waste',
-    mostActiveDay: 'Oct 14 (24.6 kg)',
-    categories: [
-      { category: 'Transportation', emission: 190.4, percentage: 44, color: '#245C45' },
-      { category: 'Electricity', emission: 121.2, percentage: 28, color: '#3B7A5E' },
-      { category: 'Food', emission: 77.9, percentage: 18, color: '#5B9377' },
-      { category: 'Waste', emission: 43.3, percentage: 10, color: '#8BAF99' },
-    ],
-    trends: [
-      { label: 'Week 1', date: 'Oct 1-7', emission: 112.5, target: 115.0 },
-      { label: 'Week 2', date: 'Oct 8-14', emission: 118.2, target: 115.0 },
-      { label: 'Week 3', date: 'Oct 15-21', emission: 103.5, target: 115.0 },
-      { label: 'Week 4', date: 'Oct 22-28', emission: 98.6, target: 115.0 },
-    ],
-    aiInsights: [
-      'A steady downward trend occurred in weeks 3 and 4 as hybrid travel and off-peak appliances were adopted.',
-      'Dietary emissions contributed a moderate 18% share of your monthly total.',
-    ],
-  },
-  this_month: {
-    totalEmissions: 482.4,
-    averageDaily: 15.56,
-    totalActivities: 94,
-    largestCategory: 'Transportation (43%)',
-    periodChange: '-6.2% vs previous month',
-    periodChangeType: 'decrease',
-    highestCategory: 'Transportation',
-    lowestCategory: 'Waste',
-    mostActiveDay: 'Friday, Oct 21',
-    categories: [
-      { category: 'Transportation', emission: 207.4, percentage: 43, color: '#245C45' },
-      { category: 'Electricity', emission: 139.9, percentage: 29, color: '#3B7A5E' },
-      { category: 'Food', emission: 86.8, percentage: 18, color: '#5B9377' },
-      { category: 'Waste', emission: 48.3, percentage: 10, color: '#8BAF99' },
-    ],
-    trends: [
-      { label: 'Week 1', date: 'Oct 1-7', emission: 112.5, target: 120.0 },
-      { label: 'Week 2', date: 'Oct 8-14', emission: 118.2, target: 120.0 },
-      { label: 'Week 3', date: 'Oct 15-21', emission: 126.5, target: 120.0 },
-      { label: 'Week 4', date: 'Oct 22-30', emission: 125.2, target: 120.0 },
-    ],
-    aiInsights: [
-      'Monthly carbon total (482.4 kg CO₂e) tracked within your 600 kg limit (79% of ceiling used).',
-      'Transportation represents your highest priority lever for next month.',
-    ],
-  },
+const SECTOR_COLORS = {
+  transport: '#245C45',
+  transportation: '#245C45',
+  electricity: '#3B7A5E',
+  food: '#5B9377',
+  waste: '#8BAF99',
+  shopping: '#4F7965',
 };
 
 export const getAnalyticsSummary = async (req, res, next) => {
   try {
     const { period = '7days' } = req.query;
-    const data = PERIOD_METRICS[period] || PERIOD_METRICS['7days'];
+    const userId = req.user?.id || req.user?._id || 'default_user';
+
+    let summaryRes = null;
+    let recsRes = null;
+
+    try {
+      if (period === 'today') {
+        summaryRes = await adkService.getDailySummary(userId);
+      } else if (period === '30days' || period === 'this_month') {
+        summaryRes = await adkService.getMonthlySummary(userId);
+      } else {
+        summaryRes = await adkService.getWeeklySummary(userId);
+      }
+      recsRes = await adkService.getRecommendations(userId);
+    } catch (err) {
+      console.warn('[AnalyticsController] SQLite summary fetch error:', err.message);
+    }
+
+    const totalEmissions = summaryRes?.total_emissions_kg_co2e || 0;
+    const activityCount = summaryRes?.activity_count || summaryRes?.active_days || (summaryRes?.daily_trend ? Object.keys(summaryRes.daily_trend).length : 0);
+    const avgDaily = summaryRes?.average_daily_kg_co2e || (period === 'today' ? totalEmissions : (activityCount > 0 ? totalEmissions / activityCount : 0));
+
+    // Canonicalize categories map
+    const categoriesMap = summaryRes?.category_breakdown || {};
+    const mergedBreakdown = {};
+    for (const [k, v] of Object.entries(categoriesMap)) {
+      const c = (k || '').toLowerCase().trim();
+      const normCat =
+        c === 'transport' || c === 'transportation' ? 'Transportation' :
+        c === 'electricity' || c === 'energy' ? 'Electricity' :
+        c === 'food' || c === 'diet' ? 'Food' :
+        c === 'waste' ? 'Waste' :
+        c === 'shopping' ? 'Shopping' :
+        k.charAt(0).toUpperCase() + k.slice(1);
+
+      const kg = typeof v === 'object' ? Number(v.kg_co2e) || 0 : Number(v) || 0;
+      mergedBreakdown[normCat] = (mergedBreakdown[normCat] || 0) + kg;
+    }
+
+    const catEntries = Object.entries(mergedBreakdown);
+
+    let highestCat = 'None';
+    let lowestCat = 'None';
+    let largestCategoryStr = 'No records yet';
+
+    if (catEntries.length > 0) {
+      catEntries.sort((a, b) => b[1] - a[1]);
+
+      const topCat = catEntries[0][0];
+      const topVal = catEntries[0][1];
+      const topPct = totalEmissions > 0 ? Math.round((topVal / totalEmissions) * 100) : 0;
+      highestCat = topCat;
+      largestCategoryStr = `${highestCat} (${topPct}%)`;
+
+      const botCat = catEntries[catEntries.length - 1][0];
+      lowestCat = botCat;
+    }
+
+    const highestDay = summaryRes?.highest_day
+      ? `${summaryRes.highest_day.date} (${summaryRes.highest_day.kg_co2e} kg)`
+      : (period === 'today' && totalEmissions > 0 ? 'Today' : 'No records yet');
+
+    const rawRecs = recsRes?.recommendations || [];
+    const aiInsights = rawRecs.slice(0, 3).map((r) => r.explanation || r.title);
+    if (aiInsights.length === 0) {
+      if (totalEmissions > 0) {
+        aiInsights.push(`Your highest recorded impact sector is ${highestCat}. Shifting to low-carbon alternatives here will offer the greatest savings.`);
+      } else {
+        aiInsights.push('Log your daily activities in the Carbon Calculator or AI Chat to generate personalized carbon telemetry.');
+      }
+    }
+
+    // Section 1.C: Your Carbon Reduction Opportunities
+    // Targeted specifically at user's highest emission category from actual data
+    const categoryOpportunities = rawRecs.filter(
+      (r) => r.category.toLowerCase() === highestCat.toLowerCase()
+    );
+
+    const reductionOpportunities = {
+      highestCategory: highestCat,
+      highestCategoryEmissions: catEntries[0] ? parseFloat(catEntries[0][1].toFixed(2)) : 0,
+      sharePercentage: totalEmissions > 0 && catEntries[0] ? Math.round((catEntries[0][1] / totalEmissions) * 100) : 0,
+      opportunities: categoryOpportunities.length > 0
+        ? categoryOpportunities
+        : rawRecs.slice(0, 2),
+      progress: {
+        currentTotal: totalEmissions,
+        dailyTarget: 16.0,
+        status: totalEmissions <= 16.0 ? 'Within sustainable carbon budget' : 'Exceeding target benchmark',
+        historicalTrend: activityCount > 0 ? `${activityCount} activities logged across ${period}` : 'No recorded activity baseline yet',
+      },
+    };
 
     return res.status(200).json({
       success: true,
       data: {
         period,
-        totalEmissions: data.totalEmissions,
-        averageDaily: data.averageDaily,
-        totalActivities: data.totalActivities,
-        largestCategory: data.largestCategory,
-        periodChange: data.periodChange,
-        periodChangeType: data.periodChangeType,
+        totalEmissions,
+        averageDaily: parseFloat(avgDaily.toFixed(2)),
+        totalActivities: activityCount,
+        largestCategory: largestCategoryStr,
+        periodChange: totalEmissions > 0 ? 'Measured via SQLite records' : 'No baseline',
+        periodChangeType: 'neutral',
         insights: {
-          highestCategory: data.highestCategory,
-          lowestCategory: data.lowestCategory,
-          mostActiveDay: data.mostActiveDay,
+          highestCategory: highestCat,
+          lowestCategory: lowestCat,
+          mostActiveDay: highestDay,
         },
-        aiInsights: data.aiInsights,
+        aiInsights,
+        reductionOpportunities,
       },
     });
   } catch (error) {
@@ -148,14 +138,41 @@ export const getAnalyticsSummary = async (req, res, next) => {
 export const getAnalyticsTrends = async (req, res, next) => {
   try {
     const { period = '7days', interval = 'daily' } = req.query;
-    const data = PERIOD_METRICS[period] || PERIOD_METRICS['7days'];
+    const userId = req.user?.id || req.user?._id || 'default_user';
+
+    let summaryRes = null;
+
+    try {
+      if (period === 'today') {
+        summaryRes = await adkService.getDailySummary(userId);
+      } else if (period === '30days' || period === 'this_month') {
+        summaryRes = await adkService.getMonthlySummary(userId);
+      } else {
+        summaryRes = await adkService.getWeeklySummary(userId);
+      }
+    } catch (err) {
+      console.warn('[AnalyticsController] SQLite trends error:', err.message);
+    }
+
+    const rawTrends = summaryRes?.daily_trend || {};
+    const trends = Object.entries(rawTrends).map(([dStr, val]) => {
+      const dt = new Date(dStr);
+      const dayLabel = dt.toLocaleDateString('en-US', { weekday: 'short' });
+      const dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return {
+        label: dayLabel || dStr,
+        date: dateLabel || dStr,
+        emission: parseFloat(val.toFixed(2)),
+        target: 16.0,
+      };
+    });
 
     return res.status(200).json({
       success: true,
       data: {
         period,
         interval,
-        trends: data.trends,
+        trends,
       },
     });
   } catch (error) {
@@ -166,13 +183,53 @@ export const getAnalyticsTrends = async (req, res, next) => {
 export const getAnalyticsCategories = async (req, res, next) => {
   try {
     const { period = '7days' } = req.query;
-    const data = PERIOD_METRICS[period] || PERIOD_METRICS['7days'];
+    const userId = req.user?.id || req.user?._id || 'default_user';
+    const days = period === 'today' ? 1 : period === '30days' || period === 'this_month' ? 30 : 7;
 
-    // Category comparison with standard target limits
-    const comparisons = data.categories.map((c) => ({
+    let catData = null;
+
+    try {
+      catData = await adkService.getCategorySummary(userId, days);
+    } catch (err) {
+      console.warn('[AnalyticsController] SQLite categories error:', err.message);
+    }
+
+    const rawCategories = catData?.categories || {};
+
+    // Canonicalize categories without duplicates
+    const mergedCategories = {};
+    let total = 0;
+
+    for (const [name, data] of Object.entries(rawCategories)) {
+      const c = (name || '').toLowerCase().trim();
+      const normCat =
+        c === 'transport' || c === 'transportation' ? 'Transportation' :
+        c === 'electricity' || c === 'energy' ? 'Electricity' :
+        c === 'food' || c === 'diet' ? 'Food' :
+        c === 'waste' ? 'Waste' :
+        c === 'shopping' ? 'Shopping' :
+        name.charAt(0).toUpperCase() + name.slice(1);
+
+      const kg = typeof data === 'object' ? Number(data.kg_co2e) || 0 : Number(data) || 0;
+      mergedCategories[normCat] = (mergedCategories[normCat] || 0) + kg;
+      total += kg;
+    }
+
+    const categories = Object.entries(mergedCategories).map(([catName, kg]) => {
+      const pct = total > 0 ? Math.round((kg / total) * 100) : 0;
+      return {
+        category: catName,
+        emission: parseFloat(kg.toFixed(2)),
+        percentage: pct,
+        color: SECTOR_COLORS[catName.toLowerCase()] || '#245C45',
+      };
+    });
+
+    // Comparison against regional benchmark ceilings
+    const comparisons = categories.map((c) => ({
       category: c.category,
       recorded: c.emission,
-      benchmark: parseFloat((c.emission * 1.15).toFixed(1)),
+      benchmark: parseFloat((c.emission > 0 ? c.emission * 1.15 : 10.0).toFixed(1)),
       color: c.color,
     }));
 
@@ -180,7 +237,7 @@ export const getAnalyticsCategories = async (req, res, next) => {
       success: true,
       data: {
         period,
-        categories: data.categories,
+        categories,
         comparisons,
       },
     });

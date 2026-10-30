@@ -1,125 +1,8 @@
-import { Footprint } from '../models/Footprint.js';
+import { adkService } from '../services/adkService.js';
 
 /**
- * Baseline Seed Activities for Activity History
- */
-const BASELINE_ACTIVITIES = [
-  {
-    id: 'act-001',
-    activity: 'Electric Metro Commute',
-    category: 'Transportation',
-    date: '2026-10-30T09:00:00.000Z',
-    displayDate: 'Today, 2:30 PM',
-    quantity: '18 km',
-    emissions: 1.8,
-    unit: 'kg CO₂e',
-    status: 'Verified',
-    emissionFactor: '0.089 kg CO₂e / passenger-km',
-    factorSource: 'UK DEFRA 2024 / National Rail',
-    assumptions: 'Grid emissions evaluated based on electrified urban rail average.',
-  },
-  {
-    id: 'act-002',
-    activity: 'Residential Power Consumption',
-    category: 'Electricity',
-    date: '2026-10-30T02:30:00.000Z',
-    displayDate: 'Today, 8:00 AM',
-    quantity: '16.5 kWh',
-    emissions: 6.4,
-    unit: 'kg CO₂e',
-    status: 'Calculated',
-    emissionFactor: '0.385 kg CO₂e / kWh',
-    factorSource: 'IEA 2024 National Grid Benchmark',
-    assumptions: 'Standard national electricity grid emission coefficient.',
-  },
-  {
-    id: 'act-003',
-    activity: 'Plant-forward Meal Lunch',
-    category: 'Food',
-    date: '2026-10-29T07:45:00.000Z',
-    displayDate: 'Yesterday, 1:15 PM',
-    quantity: '0.6 kg',
-    emissions: 2.1,
-    unit: 'kg CO₂e',
-    status: 'Verified',
-    emissionFactor: '3.50 kg CO₂e / kg composite',
-    factorSource: 'Poore & Nemecek (2018/2024) / Science',
-    assumptions: 'Farm-gate through distribution life-cycle boundary.',
-  },
-  {
-    id: 'act-004',
-    activity: 'Household Organic Composting',
-    category: 'Waste',
-    date: '2026-10-28T12:15:00.000Z',
-    displayDate: 'Oct 28, 5:45 PM',
-    quantity: '3.2 kg',
-    emissions: 0.6,
-    unit: 'kg CO₂e',
-    status: 'Verified',
-    emissionFactor: '0.08 kg CO₂e / kg',
-    factorSource: 'EPA WARM v15 / IPCC Solid Waste',
-    assumptions: 'Aerobic home composting diversion vs anaerobic municipal landfill.',
-  },
-  {
-    id: 'act-005',
-    activity: 'Grocery Trip via Hybrid Vehicle',
-    category: 'Transportation',
-    date: '2026-10-27T05:50:00.000Z',
-    displayDate: 'Oct 27, 11:20 AM',
-    quantity: '26 km',
-    emissions: 4.5,
-    unit: 'kg CO₂e',
-    status: 'Calculated',
-    emissionFactor: '0.171 kg CO₂e / vehicle-km',
-    factorSource: 'UK DEFRA 2024 (Passenger Car)',
-    assumptions: 'Medium hybrid passenger vehicle real-world fuel economy.',
-  },
-  {
-    id: 'act-006',
-    activity: 'Eco-Certified Cotton Apparel Purchase',
-    category: 'Shopping',
-    date: '2026-10-26T10:10:00.000Z',
-    displayDate: 'Oct 26, 3:40 PM',
-    quantity: '1 item (0.4 kg)',
-    emissions: 3.2,
-    unit: 'kg CO₂e',
-    status: 'Verified',
-    emissionFactor: '8.00 kg CO₂e / garment',
-    factorSource: 'WRAP Sustainable Clothing Action Plan',
-    assumptions: 'Textile supply chain cradle-to-retail.',
-  },
-  {
-    id: 'act-007',
-    activity: 'Residential AC Usage (Warm Afternoon)',
-    category: 'Electricity',
-    date: '2026-10-25T08:00:00.000Z',
-    displayDate: 'Oct 25, 1:30 PM',
-    quantity: '4.5 hours (6 kWh)',
-    emissions: 2.3,
-    unit: 'kg CO₂e',
-    status: 'Calculated',
-    emissionFactor: '0.385 kg CO₂e / kWh',
-    factorSource: 'IEA 2024 National Grid Benchmark',
-    assumptions: 'Rated 1.3 kW cooling load with average inverter duty cycle.',
-  },
-  {
-    id: 'act-008',
-    activity: 'Intercity Rail Journey',
-    category: 'Transportation',
-    date: '2026-10-24T03:00:00.000Z',
-    displayDate: 'Oct 24, 8:30 AM',
-    quantity: '120 km',
-    emissions: 4.2,
-    unit: 'kg CO₂e',
-    status: 'Verified',
-    emissionFactor: '0.035 kg CO₂e / passenger-km',
-    factorSource: 'UK DEFRA 2024 / Intercity Rail',
-    assumptions: 'National passenger average load factor.',
-  },
-];
-
-/**
- * Get Activity History with Filtering, Searching, Sorting, and Pagination
+ * Get Activity History with Filtering, Searching, Sorting, and Pagination.
+ * Uses real SQLite activity storage from Python ADK service.
  */
 export const getActivities = async (req, res, next) => {
   try {
@@ -134,38 +17,58 @@ export const getActivities = async (req, res, next) => {
 
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
+    const userId = req.user?.id || req.user?._id || 'default_user';
 
-    // Check if MongoDB has real logged records for user
-    const userId = req.user?.id || req.user?._id;
-    let records = [];
+    let rawActivities = [];
 
-    if (userId) {
-      const dbFootprints = await Footprint.find({ userId }).sort({ loggedAt: -1 }).lean();
-      if (dbFootprints && dbFootprints.length > 0) {
-        records = dbFootprints.map((item) => ({
-          id: item._id.toString(),
-          activity: item.activityName,
-          category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
-          date: item.loggedAt,
-          displayDate: new Intl.DateTimeFormat('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          }).format(new Date(item.loggedAt)),
-          quantity: item.activityData?.quantity || '1 unit',
-          emissions: item.emissionValue,
-          unit: 'kg CO₂e',
-          status: 'Logged',
-          emissionFactor: item.activityData?.factorSource || 'Verified Standard',
-          factorSource: item.activityData?.factorSource || 'DEFRA / IPCC 2024',
-          assumptions: 'User logged activity record.',
-        }));
+    // Fetch real recorded activities from Python SQLite
+    try {
+      const result = await adkService.getActivities(userId, 100);
+      if (result && Array.isArray(result.activities)) {
+        rawActivities = result.activities;
       }
+    } catch (err) {
+      console.warn('[ActivityController] Could not reach Python SQLite activities service:', err.message);
     }
 
-    // Combine with baseline activities if records are empty
-    if (records.length === 0) {
-      records = [...BASELINE_ACTIVITIES];
-    }
+    // Map SQLite records to frontend Activity model
+    let records = rawActivities.map((item) => {
+      const catKey = (item.category || '').toLowerCase();
+      const normCategory =
+        catKey === 'transport' ? 'Transportation' :
+        catKey === 'electricity' ? 'Electricity' :
+        catKey === 'food' ? 'Food' :
+        catKey === 'waste' ? 'Waste' :
+        catKey === 'shopping' ? 'Shopping' :
+        catKey.charAt(0).toUpperCase() + catKey.slice(1);
+
+      const typeFormatted = (item.activity_type || 'Activity')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+
+      return {
+        id: item.activity_id,
+        activity: typeFormatted,
+        category: normCategory,
+        date: item.created_at,
+        displayDate: item.created_at
+          ? new Intl.DateTimeFormat('en-US', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }).format(new Date(item.created_at))
+          : 'Just now',
+        quantity: `${item.quantity} ${item.unit || 'units'}`,
+        emissions: item.kg_co2e,
+        unit: 'kg CO₂e',
+        status: item.data_quality === 'calculated' ? 'Calculated' : 'Verified',
+        emissionFactor: item.emission_factor || 'Verified Factor',
+        factorSource: item.source || 'UK DEFRA 2024 / IPCC',
+        formula: item.formula || '',
+        assumptions: Array.isArray(item.assumptions)
+          ? item.assumptions.join('; ')
+          : String(item.assumptions || ''),
+      };
+    });
 
     // 1. Filter by category
     if (category && category !== 'all') {
@@ -212,7 +115,7 @@ export const getActivities = async (req, res, next) => {
     // Compute Summary Figures over filtered records
     const totalActivities = records.length;
     const totalEmissions = parseFloat(
-      records.reduce((sum, item) => sum + item.emissions, 0).toFixed(1)
+      records.reduce((sum, item) => sum + item.emissions, 0).toFixed(2)
     );
     const transportationCount = records.filter(
       (r) => r.category.toLowerCase() === 'transportation'
@@ -252,34 +155,44 @@ export const getActivities = async (req, res, next) => {
 export const getActivityById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const found = BASELINE_ACTIVITIES.find((a) => a.id === id);
+    const userId = req.user?.id || req.user?._id || 'default_user';
 
-    if (found) {
-      return res.status(200).json({ success: true, activity: found });
-    }
+    try {
+      const result = await adkService.getActivities(userId, 100);
+      const found = (result?.activities || []).find((a) => a.activity_id === id);
 
-    const dbRecord = await Footprint.findById(id).lean();
-    if (dbRecord) {
-      return res.status(200).json({
-        success: true,
-        activity: {
-          id: dbRecord._id.toString(),
-          activity: dbRecord.activityName,
-          category: dbRecord.category.charAt(0).toUpperCase() + dbRecord.category.slice(1),
-          date: dbRecord.loggedAt,
-          displayDate: new Intl.DateTimeFormat('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          }).format(new Date(dbRecord.loggedAt)),
-          quantity: dbRecord.activityData?.quantity || '1 unit',
-          emissions: dbRecord.emissionValue,
-          unit: 'kg CO₂e',
-          status: 'Logged',
-          emissionFactor: dbRecord.activityData?.factorSource || 'Verified Factor',
-          factorSource: dbRecord.activityData?.factorSource || 'DEFRA 2024 / IPCC',
-          assumptions: 'Telemetry record stored in database.',
-        },
-      });
+      if (found) {
+        const catKey = (found.category || '').toLowerCase();
+        const normCategory =
+          catKey === 'transport' ? 'Transportation' :
+          catKey === 'electricity' ? 'Electricity' :
+          catKey === 'food' ? 'Food' :
+          catKey === 'waste' ? 'Waste' :
+          catKey.charAt(0).toUpperCase() + catKey.slice(1);
+
+        return res.status(200).json({
+          success: true,
+          activity: {
+            id: found.activity_id,
+            activity: found.activity_type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+            category: normCategory,
+            date: found.created_at,
+            displayDate: new Date(found.created_at).toLocaleString(),
+            quantity: `${found.quantity} ${found.unit || 'units'}`,
+            emissions: found.kg_co2e,
+            unit: 'kg CO₂e',
+            status: found.data_quality === 'calculated' ? 'Calculated' : 'Verified',
+            emissionFactor: found.emission_factor || 'Verified Factor',
+            factorSource: found.source || 'UK DEFRA 2024 / IPCC',
+            formula: found.formula || '',
+            assumptions: Array.isArray(found.assumptions)
+              ? found.assumptions.join('; ')
+              : String(found.assumptions || ''),
+          },
+        });
+      }
+    } catch (err) {
+      console.warn('[ActivityController] Could not fetch activity detail from Python SQLite:', err.message);
     }
 
     return res.status(404).json({ success: false, message: 'Activity record not found.' });

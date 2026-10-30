@@ -33,6 +33,7 @@ export const CalculatorResults = ({ results, onSaveSuccess }) => {
     categoryBreakdown = [],
     detailedResults = [],
     calculationInformation = {},
+    reductionTip,
     aiInsight,
   } = results;
 
@@ -126,7 +127,7 @@ export const CalculatorResults = ({ results, onSaveSuccess }) => {
           <div
             className={`mt-4 p-3 rounded-md text-xs flex items-center gap-2 ${
               saveStatus === 'saved'
-                ? 'bg-primary/10 border border-primary/20 text-primary-dark font-medium'
+                ? 'bg-primary/10 border border-primary/20 text-primary font-medium'
                 : 'bg-red-50 border border-red-200 text-red-800'
             }`}
           >
@@ -139,8 +140,57 @@ export const CalculatorResults = ({ results, onSaveSuccess }) => {
           </div>
         )}
 
+        {/* Section 1.B: Relevant Reduction Tip Post-Calculation */}
+        {reductionTip && (
+          <div className="mt-5 p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                  Personalized Reduction Tip
+                </span>
+              </div>
+              {reductionTip.category && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface border border-border text-text-main">
+                  {reductionTip.category}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h4 className="text-xs sm:text-sm font-semibold text-text-main">
+                {reductionTip.title}
+              </h4>
+              <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                {reductionTip.explanation}
+              </p>
+            </div>
+
+            {reductionTip.action && (
+              <div className="p-2.5 rounded bg-surface border border-border/70 text-xs flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-text-main text-[11px] block">Action:</span>
+                  <p className="text-text-secondary text-[11px] leading-relaxed">
+                    {reductionTip.action}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {reductionTip.estimatedSavings && (
+              <div className="text-[11px] text-primary font-semibold flex items-center gap-1.5 pt-0.5">
+                <span className="text-text-secondary font-medium">Estimated Impact:</span>
+                <span className="font-mono">{reductionTip.estimatedSavings}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* AI Insight Box */}
-        {aiInsight && (
+        {aiInsight && !reductionTip && (
           <div className="mt-5 p-3.5 bg-background border border-border rounded-md flex items-start gap-3 text-xs">
             <div className="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
               <Sparkles className="w-3.5 h-3.5" />

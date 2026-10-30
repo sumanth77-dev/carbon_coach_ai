@@ -1,0 +1,21 @@
+{
+  "name": "carbon-coach-platform",
+  "version": "1.0.0",
+  "description": "Carbon Coach — AI-Powered Carbon Footprint Management and Recommendation Platform",
+  "private": true,
+  "scripts": {
+    "start:python": "cd carbon_coach_ai && .venv\\Scripts\\python.exe main.py --port 8080",
+    "start:backend": "cd backend && node server.js",
+    "start:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "carbon-footprint",
+    "sustainability",
+    "google-adk",
+    "gemini",
+    "mern"
+  ],
+  "author": "Carbon Coach Team",
+  "license": "ISC"
+}
